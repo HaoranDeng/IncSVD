@@ -1,0 +1,172 @@
+Metadata-Version: 2.1
+Name: IncSVD
+Version: 0.0.1
+Summary: Towards Efficient Updating of Truncated Singular Value Decompostion
+Author-email: Haoran Deng <denghaoran@zju.edu.cn>
+Project-URL: Homepage, https://github.com/Erikaqvq/ISVD_pypi
+Project-URL: Bug Tracker, https://github.com/Erikaqvq/ISVD_pypi/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.19
+Requires-Dist: scikit-learn>=0.23
+Requires-Dist: scipy>=1.5
+
+
+
+**Supported matrix types**: 
+
+- Network (similar to graph adjacency matrix)
+
+- Non-network (similar to recommender system user-item matrix)
+
+**Supported functions**: 
+
+- regular SVD initialization (scipy.sparse.linalg.svds)
+- SVD updating (zha-simon, vecharynski, random, and the corresponding three optimization methods of ours)
+- Batch update, variable update step, dynamic matrix addition
+
+
+
+#### Class Initialization
+
+```python
+# data: An n-by-n matrix representing a network
+# init: The portion(number of rows/columns) of the matrix desired as the SVD initialization
+EMmatrix = EM.EvolvingMatrix(matrix=data[:init_m, :init_m], sparse=sparse, network = network)
+```
+
+- Parameters
+
+​	- matrix : ndarray of shape (m_dim, n_dim)
+
+​            Initial input matrix
+
+​			For network types, it must be guaranteed that m_dim = n_dim
+
+​	- network : bool - whether it's a network
+
+​            True - An update consists of a row update and a column update
+
+​            False - only update rows
+
+​	- sparse : bool - whether it's a sparse matrix
+
+​            True - use our methods
+
+​            False - use the original methods ('z-s', 'vecharynski' or 'random')
+
+- Return value
+
+​	EMmatrix: an object of class EvolvingMatrix
+
+
+
+#### SVD Initialization
+
+```python
+# k=128
+# init_svd = init_m * 0.5
+u, s, vt = EMmatrix.TruncatedSVD(k_dim=k, init=init_svd, method='z-s')
+```
+
+- Parameters
+
+​	- k_dim: int - the rank of truncated SVD to be calculated
+
+​            must be smaller than or equal to min(m_dim, n_dim)
+
+​	- init: int - number of rows to perform the initial SVD decomposition
+
+​			must be smaller than or equal to m_dim
+
+​			Network: calculate SVD(matrix[:init_svd, :init_svd])
+
+​			Non-network: calculate SVD(matrix[:init_svd, :])
+
+​	- method: string, default='z-s'
+
+​			choose from ['z-s', 'vecharynski', 'random']
+
+​			will automatically select the appropriate method based on the *sparse* parameter
+
+- Return value
+
+  ​	*u @ np.diag(s) @ vt* denotes the reconstructed original matrix
+
+
+
+#### Set Step Length
+
+You can either declare the update step length on each update or use the SetStepLength() function once and for all. Step lengths also support dynamic updates, where the step length can be different for each update.
+
+```py
+EMmatrix.SetStepLength(step_length = 100)
+```
+
+- Parameters
+
+​	- step_length: int
+
+​			Step length must be a positive integer.
+
+
+
+#### Set Append Matrix
+
+Although we define a matrix when the class was initialized, we can still keep expanding it. Regardless of whether the type is Network or Non-Network, just enter the additions to the matrix of the correct size.
+
+SVD must be initialized before setting append matrix.
+
+```py
+# Network = True
+EMmatrix.SetAppendMatrix(A_csr = new_rows, A_csc=new_cols)
+
+# Network = False
+EMmatrix.SetAppendMatrix(append_matrix = new_matrix)
+```
+
+- Parameters
+
+​	- [Only for Network] A_csr: ndarray of shape(newl, n_dim + newl)
+
+​			n_dim: the number of columns of the whole matrix before this update
+
+​	- [Only for Network] A_csc: ndarray of shape(m_dim + newl, newl)
+
+​			m_dim(=n_dim): the number of rows of the whole matrix before this update
+
+​	- [Only for Non-network] new_matrix: ndarray of shape(newl, n_dim)
+
+​			n_dim: Fixed number of columns
+
+
+
+#### Perform Updates
+
+```py
+EMmatrix.Update(num_step=10, step_length=1000, timer=False)
+```
+
+- Parameters
+
+​	- num_step: int - number of updates performed
+
+​			If not declared, the default setting is to update all remaining sections in full
+
+​			If the maximum number of updatable steps is exceeded, it is automatically changed to the maximum value
+
+​			must be a positive integer
+
+​	- step_length: int
+
+​			can be ignored if already set
+
+​			If the value is different from the previous setting, the next update will use the newly set value
+
+​			must be a positive integer
+
+​	- timer: bool - whether to use a timer

@@ -1,0 +1,12 @@
+.DS_Store
+LICENSE
+MANIFEST.in
+README.md
+pyproject.toml
+src/IncSVD/EvolvingMatrix.py
+src/IncSVD/svd_update.py
+src/IncSVD.egg-info/PKG-INFO
+src/IncSVD.egg-info/SOURCES.txt
+src/IncSVD.egg-info/dependency_links.txt
+src/IncSVD.egg-info/requires.txt
+src/IncSVD.egg-info/top_level.txt
