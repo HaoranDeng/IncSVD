@@ -1,6 +1,6 @@
 # IncSVD: A python package for dynamic Truncated SVD
 
-[![PyPI](https://img.shields.io/badge/-PyPI-FFFFFF?style=plastic&logo=pypi&logoColor=3775A9)]()
+[![PyPI](https://img.shields.io/badge/-PyPI-FFFFFF?style=plastic&logo=pypi&logoColor=3775A9)](https://pypi.org/project/IncSVD/)
 [![https://arxiv.org/pdf/2401.09703.pdf](https://img.shields.io/badge/-arXiv-B31B1B?style=plastic&logo=arxiv&logoColor=FFFFFF)](https://arxiv.org/pdf/2401.09703.pdf)
 
 **IncSVD** is a python package capable of dynamically maintaining the incremental Truncated Singular Value Decomposition (Truncated SVD) of evolving matrices.
